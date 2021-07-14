@@ -1,0 +1,111 @@
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Date;
+import javafx.application.Application;
+import static javafx.application.Application.launch;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ *
+ * @author joann
+ */
+public class Server extends Application {
+  @Override // Override the start method in the Application class
+  public void start(Stage primaryStage) {
+    // Text area for displaying contents
+    TextArea ta = new TextArea();
+
+    // Create a scene and place it in the stage
+    Scene scene = new Scene(new ScrollPane(ta), 450, 200);
+    primaryStage.setTitle("Server"); // Set the stage title
+    primaryStage.setScene(scene); // Place the scene in the stage
+    primaryStage.show(); // Display the stage
+    
+    new Thread( () -> {
+      try {
+        // Create a server socket
+        ServerSocket serverSocket = new ServerSocket(8000);
+        Platform.runLater(() ->
+          ta.appendText("Server started at " + new Date() + '\n'));
+  
+        // Listen for a connection request
+        Socket socket = serverSocket.accept();
+  
+        // Create data input and output streams
+        DataInputStream inputFromClient = new DataInputStream(
+          socket.getInputStream());
+        DataOutputStream outputToClient = new DataOutputStream(
+          socket.getOutputStream());
+  
+        while (true) {
+          // Receive radius from the client
+          int number = inputFromClient.readInt();
+  
+          // Compute area
+          boolean prime = checkPrime(number);
+  
+          // Send area back to the client
+          outputToClient.writeBoolean(prime);
+  
+          Platform.runLater(() -> {
+            ta.appendText("The number recieved from the client : " 
+              + number + '\n');
+            //ta.appendText(number + " is: " + isPrime(prime) + '\n'); 
+          });
+        }
+      }
+      catch(IOException ex) {
+        ex.printStackTrace();
+      }
+    }).start();
+  }
+
+  /**
+   * The main method is only needed for the IDE with limited
+   * JavaFX support. Not needed for running from the command line.
+   */
+  public static void main(String[] args) {
+    launch(args);
+  }
+  private boolean checkPrime(int n){
+      boolean isPrime=false;
+       int i,m=0,flag=0;      
+        m=n/2;      
+        if(n==0||n==1){  
+         isPrime=false;      
+        }else{  
+         for(i=2;i<=m;i++){      
+          if(n%i==0){      
+           isPrime=false;     
+           flag=1;      
+           break;      
+          }      
+         }      
+         if(flag==0)  { isPrime=true; }  
+        }//end of else 
+        return isPrime;
+      }
+ private String isPrime(boolean prime){
+      String isPrime = "not prime";
+      if(prime)
+          isPrime="prime";
+      return isPrime;
+  }
+ 
+  }
+
+
